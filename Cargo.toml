@@ -8,7 +8,8 @@ homepage="https://www.svix.com"
 repository="https://github.com/svix/rust-ksuid"
 readme="README.md"
 license="MIT"
-keywords=["ksuid", "uuid", "svix"]
+keywords=["ksuid", "uuid", "svix", "segment"]
+categories = ["data-structures", "concurrency", "database", "encoding"]
 
 [badges]
 maintenance = {status="actively-developed"}
