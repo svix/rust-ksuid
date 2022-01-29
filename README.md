@@ -132,3 +132,5 @@ assert!(ksuid2 >= ksuid1);
 ### License
 
 ksuid source code is available under an MIT [License](./LICENSE).
+
+All rights reserved to the [Svix webhooks service](https://www.svix.com).

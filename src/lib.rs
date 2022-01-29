@@ -1,3 +1,54 @@
+//! A pure Rust and fully tested KSUID implementation
+//!
+//! This library is fully compatible with [Segment's KSUID](https://segment.com/blog/a-brief-history-of-the-uuid/) implementation:
+//! <https://github.com/segmentio/ksuid>
+//!
+//! ## What is a ksuid?
+//!
+//! A ksuid is a K sorted UID. In other words, a KSUID also stores a date component, so that ksuids can be approximately
+//! sorted based on the time they were created.
+//!
+//! Read more [here](https://segment.com/blog/a-brief-history-of-the-uuid/).
+//!
+//! ## Usage
+//!
+//! Add the dependency:
+//!
+//! ```
+//! [dependencies]
+//! svix-ksuid = "^0.5.0"
+//! ```
+//!
+//! ```
+//! use svix_ksuid::*;
+//!
+//! let ksuid = Ksuid::new(None, None);
+//! println("{}", ksuid.to_string());
+//! // 1srOrx2ZWZBpBUvZwXKQmoEYga2
+//! ```
+//!
+//! ### Higher timestamp accuracy mode
+//!
+//! Ksuids have a 1 second accuracy which is not sufficient for all use-cases. That's why this library exposes a higher accuracy mode which supports accuracy of up to 4ms.
+//!
+//! It's fully compatible with normal ksuids, in fact, it outputs valid ksuids. The difference is that it sacrifices one byte of the random payload in favor of this accuracy.
+//!
+//! The code too is fully compatible:
+//!
+//! ```
+//! use svix_ksuid::*;
+//!
+//! let ksuid = KsuidMs::new(None, None);
+//! ```
+//!
+//! And they both implement the same `KsuidLike` trait.
+//! 
+//! ### License
+//! 
+//! ksuid source code is available under an MIT [License](./LICENSE).
+//! 
+//! All rights reserved to the [Svix webhooks service](https://www.svix.com).
+
 use core::fmt;
 use std::{error, str::FromStr};
 
@@ -25,9 +76,27 @@ impl error::Error for Error {
     }
 }
 
+/// K-Sortable Unique ID Trait
+///
+/// This trait is implemented by all of the ksuid variants
+///
+/// # Examples
+/// ```
+/// use svix_ksuid::*;
+/// use std::str::FromStr;
+///
+/// let ksuid = Ksuid::new(None, None);
+/// let as_string: String = ksuid.to_string();
+/// let ksuid2 = Ksuid::from_str(&as_string).unwrap();
+/// assert_eq!(ksuid, ksuid2);
+///  ```
 pub trait KsuidLike {
+    /// The type of the Ksuid struct beind implemented
     type Type;
+
+    /// The number of bytes used for timestamp (`TIMESTAMP_BYTES + PAYLOAD_BYTES == 20`)
     const TIMESTAMP_BYTES: usize;
+    /// The number of bytes used for payload (`TIMESTAMP_BYTES + PAYLOAD_BYTES == 20`)
     const PAYLOAD_BYTES: usize;
 
     /// Creates new Ksuid with specified timestamp (DateTime) and optional payload
@@ -168,6 +237,10 @@ pub trait KsuidLike {
     }
 }
 
+/// K-Sortable Unique ID
+///
+/// This is the standard (one second accuracy) variant.
+///
 /// # Examples
 /// ```
 /// use svix_ksuid::*;
@@ -178,7 +251,6 @@ pub trait KsuidLike {
 /// let ksuid2 = Ksuid::from_str(&as_string).unwrap();
 /// assert_eq!(ksuid, ksuid2);
 ///  ```
-/// K-Sortable Unique ID
 #[derive(Debug, PartialOrd, Ord, Clone, Copy, PartialEq, Eq)]
 pub struct Ksuid([u8; TOTAL_BYTES]);
 
@@ -261,6 +333,10 @@ impl FromStr for Ksuid {
     }
 }
 
+/// K-Sortable Unique ID (Ms accuracy)
+///
+/// This one has Ms accuracy compared to the normal one that has second accuracy
+///
 /// # Examples
 /// ```
 /// use svix_ksuid::*;
@@ -271,9 +347,6 @@ impl FromStr for Ksuid {
 /// let ksuid2 = KsuidMs::from_str(&as_string).unwrap();
 /// assert_eq!(ksuid, ksuid2);
 ///  ```
-/// K-Sortable Unique ID
-///
-/// This one has Ms accuracy compared to the normal one that has second accuracy
 #[derive(Debug, PartialOrd, Ord, Clone, Copy, PartialEq, Eq)]
 pub struct KsuidMs([u8; TOTAL_BYTES]);
 
