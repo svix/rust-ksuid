@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 0.5.3
+* Add homepage to cargo metadata
+
 ## Version 0.5.2
 * Improve docs and readme
 
