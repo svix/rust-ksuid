@@ -1,6 +1,6 @@
 [package]
 name = "svix-ksuid"
-version = "0.5.2"
+version = "0.5.3"
 authors = ["Svix Inc. <oss@svix.com>"]
 edition = "2021"
 description="A pure Rust and fully tested KSUID implementation"
