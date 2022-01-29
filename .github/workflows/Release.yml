@@ -1,9 +1,9 @@
 name: Release
 
 on:
-create:
-  tags:
-    - v*
+  create:
+    tags:
+      - v*
 
 jobs:
   release:
