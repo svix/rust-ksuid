@@ -32,12 +32,12 @@ Read more [here](https://segment.com/blog/a-brief-history-of-the-uuid/).
 
 Add the dependency:
 
-```
+```rust
 [dependencies]
 svix-ksuid = "^0.5.0"
 ```
 
-```
+```rust
 use svix_ksuid::*;
 
 let ksuid = Ksuid::new(None, None);
@@ -53,7 +53,7 @@ It's fully compatible with normal ksuids, in fact, it outputs valid ksuids. The 
 
 The code too is fully compatible:
 
-```
+```rust
 use svix_ksuid::*;
 
 let ksuid = KsuidMs::new(None, None);
