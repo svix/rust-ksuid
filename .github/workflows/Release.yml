@@ -1,0 +1,24 @@
+name: Release
+
+on:
+create:
+  tags:
+    - v*
+
+jobs:
+  release:
+    # Run `cargo check` first to ensure that the pushed code at least compiles.
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - uses: actions-rs/toolchain@v1
+      with:
+        toolchain: stable
+        override: true
+        profile: minimal
+        components: clippy, rustfmt
+    - uses: Swatinem/rust-cache@v1
+    - name: Publish
+      uses: actions-rs/cargo@v1
+      with:
+        command: publish
