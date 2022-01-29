@@ -42,11 +42,11 @@
 //! ```
 //!
 //! And they both implement the same `KsuidLike` trait.
-//! 
+//!
 //! ### License
-//! 
+//!
 //! ksuid source code is available under an MIT [License](./LICENSE).
-//! 
+//!
 //! All rights reserved to the [Svix webhooks service](https://www.svix.com).
 
 use core::fmt;
