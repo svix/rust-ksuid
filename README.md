@@ -10,7 +10,9 @@
 A pure Rust and fully tested KSUID implementation
 
 ![GitHub tag](https://img.shields.io/github/tag/svix/rust-ksuid.svg)
+[![Crates.io](https://img.shields.io/crates/v/svix-ksuid)](https://crates.io/crates/svix-ksuid)
 [![Build Status](https://github.com/svix/rust-ksuid/workflows/CI/badge.svg)](https://github.com/svix/rust-ksuid/actions)
+[![docs.rs](https://docs.rs/svix-ksuid/badge.svg)](https://docs.rs/svix-ksuid/)
 [![License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](LICENSE)
 [![Join our slack](https://img.shields.io/badge/Slack-join%20the%20community-blue?logo=slack&style=social)](https://www.svix.com/slack/)
 
