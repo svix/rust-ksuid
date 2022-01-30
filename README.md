@@ -32,7 +32,7 @@ Read more [here](https://segment.com/blog/a-brief-history-of-the-uuid/).
 
 Add the dependency:
 
-```rust
+```toml
 [dependencies]
 svix-ksuid = "^0.5.0"
 ```
