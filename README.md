@@ -72,23 +72,23 @@ use svix_ksuid::*;
 let ksuid = Ksuid::new(None, None);
 
 // Base62
-println("{}", ksuid.to_string()); // also: ksuid.to_base62()
+println!("{}", ksuid.to_string()); // also: ksuid.to_base62()
 // 1srOrx2ZWZBpBUvZwXKQmoEYga2
 
 // Bytes (&[u8])
-println("{:?}", ksuid.bytes());
+println!("{:?}", ksuid.bytes());
 // [13, 53, 196, 51, 225, 147, 62, 55, 242, 117, 112, 135, 99, 173, 199, 116, 90, 245, 231, 242]
 
 // Timestamp (chrono::DateTime<Utc>)
-println("{:?}", ksuid.timestamp());
+println!("{:?}", ksuid.timestamp());
 // 2021-05-21T20:04:03Z
 
 // Timestamp (seconds)
-println("{}", ksuid.timestamp_seconds());
+println!("{}", ksuid.timestamp_seconds());
 1621627443
 
 // Payload (&[u8])
-println("{:?}", ksuid.bytes());
+println!("{:?}", ksuid.bytes());
 // [225, 147, 62, 55, 242, 117, 112, 135, 99, 173, 199, 116, 90, 245, 231, 242]
 ```
 
