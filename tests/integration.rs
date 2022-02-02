@@ -71,7 +71,7 @@ fn test_ksuidms_reference_compat() -> Result<(), String> {
 
         let ksuidms = KsuidMs::from_str(&data_line.ksuid).unwrap();
         let timediff = ksuidms.timestamp() - ksuid.timestamp();
-        assert!(timediff.num_milliseconds().abs() <= 1_000);
+        assert!(timediff.whole_milliseconds().abs() <= 1_000);
         assert_eq!(ksuidms.to_base62(), data_line.ksuid);
     }
     Ok(())
@@ -84,7 +84,7 @@ fn test_ksuidms_corner_cases() -> Result<(), String> {
     let ksuid = Ksuid::from_seconds(Some(40_000), Some(&buf));
     let ksuidms = KsuidMs::from_bytes(*ksuid.bytes());
     let timediff = ksuidms.timestamp() - ksuid.timestamp();
-    assert!(timediff.num_milliseconds().abs() <= 1_000);
+    assert!(timediff.whole_milliseconds().abs() <= 1_000);
     Ok(())
 }
 

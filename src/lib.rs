@@ -14,7 +14,7 @@
 //!
 //! Add the dependency:
 //!
-//! ```
+//! ```toml
 //! [dependencies]
 //! svix-ksuid = "^0.5.0"
 //! ```
@@ -23,7 +23,7 @@
 //! use svix_ksuid::*;
 //!
 //! let ksuid = Ksuid::new(None, None);
-//! println("{}", ksuid.to_string());
+//! println!("{}", ksuid.to_string());
 //! // 1srOrx2ZWZBpBUvZwXKQmoEYga2
 //! ```
 //!
@@ -53,7 +53,7 @@ use core::fmt;
 use std::{error, str::FromStr};
 
 use byteorder::{BigEndian, ByteOrder};
-use chrono::{DateTime, NaiveDateTime, Utc};
+use time::OffsetDateTime;
 
 pub const KSUID_EPOCH: i64 = 1_400_000_000;
 
@@ -74,6 +74,10 @@ impl error::Error for Error {
     fn source(&self) -> Option<&(dyn error::Error + 'static)> {
         None
     }
+}
+
+fn timestamp_millis(dt: &OffsetDateTime) -> i64 {
+    (dt.unix_timestamp_nanos() / 1_000_000) as i64
 }
 
 /// K-Sortable Unique ID Trait
@@ -107,7 +111,7 @@ pub trait KsuidLike {
     ///
     /// let ksuid = Ksuid::new(None, None);
     /// ```
-    fn new(timestamp: Option<DateTime<Utc>>, payload: Option<&[u8]>) -> Self::Type;
+    fn new(timestamp: Option<OffsetDateTime>, payload: Option<&[u8]>) -> Self::Type;
 
     /// Creates new Ksuid with specified timestamp (in seconds) and optional payload
     ///
@@ -124,10 +128,13 @@ pub trait KsuidLike {
     /// # Examples
     /// ```
     /// use svix_ksuid::*;
+    /// use time::OffsetDateTime;
     ///
-    /// let ksuid = Ksuid::new_raw(0, None);
+    /// let now = OffsetDateTime::now_utc();
+    /// let ksuid = Ksuid::new(Some(now), None);
+    /// assert_eq!(now.unix_timestamp(), ksuid.timestamp().unix_timestamp());
     /// ```
-    fn timestamp(&self) -> DateTime<Utc>;
+    fn timestamp(&self) -> OffsetDateTime;
 
     /// Get the timestamp portion of the ksuid in seconds
     ///
@@ -140,7 +147,7 @@ pub trait KsuidLike {
     /// assert_eq!(ksuid.timestamp_seconds(), timestamp);
     /// ```
     fn timestamp_seconds(&self) -> i64 {
-        self.timestamp().timestamp()
+        self.timestamp().unix_timestamp()
     }
 
     /// Get the payload portion of the ksuid
@@ -294,13 +301,13 @@ impl KsuidLike for Ksuid {
     const TIMESTAMP_BYTES: usize = 4;
     const PAYLOAD_BYTES: usize = 16;
 
-    fn new(timestamp: Option<DateTime<Utc>>, payload: Option<&[u8]>) -> Self {
-        let timestamp = timestamp.map(|x| x.timestamp());
+    fn new(timestamp: Option<OffsetDateTime>, payload: Option<&[u8]>) -> Self {
+        let timestamp = timestamp.map(|x| x.unix_timestamp());
         Self::from_seconds(timestamp, payload)
     }
 
     fn from_seconds(timestamp: Option<i64>, payload: Option<&[u8]>) -> Self {
-        let timestamp = timestamp.unwrap_or_else(|| Utc::now().timestamp()) - KSUID_EPOCH;
+        let timestamp = timestamp.unwrap_or_else(|| OffsetDateTime::now_utc().unix_timestamp()) - KSUID_EPOCH;
         Self::new_raw(timestamp as u32, payload)
     }
 
@@ -312,10 +319,9 @@ impl KsuidLike for Ksuid {
         &self.0
     }
 
-    fn timestamp(&self) -> DateTime<Utc> {
+    fn timestamp(&self) -> OffsetDateTime {
         let timestamp = self.timestamp_raw() as i64 + KSUID_EPOCH;
-        let naive = NaiveDateTime::from_timestamp(timestamp, 0);
-        DateTime::from_utc(naive, Utc)
+        OffsetDateTime::from_unix_timestamp(timestamp).unwrap()
     }
 }
 
@@ -386,7 +392,7 @@ impl KsuidMs {
     /// let ksuid = KsuidMs::from_millis(Some(1_621_627_443_000), None);
     /// ```
     pub fn from_millis(timestamp: Option<i64>, payload: Option<&[u8]>) -> Self {
-        let timestamp_ms = timestamp.unwrap_or_else(|| Utc::now().timestamp_millis());
+        let timestamp_ms = timestamp.unwrap_or_else(|| timestamp_millis(&OffsetDateTime::now_utc()));
         let timestamp_s = (timestamp_ms / 1_000) - KSUID_EPOCH;
         let timestamp_ms = (timestamp_ms % 1_000) >> 2;
         let timestamp = ((timestamp_s << 8) & 0xFFFFFFFF00) | timestamp_ms;
@@ -404,7 +410,7 @@ impl KsuidMs {
     /// assert_eq!(ksuid.timestamp_millis(), timestamp);
     /// ```
     pub fn timestamp_millis(&self) -> i64 {
-        self.timestamp().timestamp_millis()
+        timestamp_millis(&self.timestamp())
     }
 
     /// Get the raw timestamp value of the ksuid
@@ -429,8 +435,8 @@ impl KsuidLike for KsuidMs {
     const TIMESTAMP_BYTES: usize = 5;
     const PAYLOAD_BYTES: usize = 15;
 
-    fn new(timestamp: Option<DateTime<Utc>>, payload: Option<&[u8]>) -> Self {
-        let timestamp = timestamp.map(|x| x.timestamp_millis());
+    fn new(timestamp: Option<OffsetDateTime>, payload: Option<&[u8]>) -> Self {
+        let timestamp = timestamp.map(|x| timestamp_millis(&x));
         Self::from_millis(timestamp, payload)
     }
 
@@ -447,13 +453,12 @@ impl KsuidLike for KsuidMs {
         &self.0
     }
 
-    fn timestamp(&self) -> DateTime<Utc> {
+    fn timestamp(&self) -> OffsetDateTime {
         let timestamp = self.timestamp_raw() as i64;
-        let seconds = (timestamp >> 8) + KSUID_EPOCH;
-        let ns = 1_000_000 * (((timestamp & 0xFF) << 2) % 1_000);
+        let seconds = ((timestamp >> 8) + KSUID_EPOCH) as i128;
+        let ns = (1_000_000 * (((timestamp & 0xFF) << 2) % 1_000)) as i128;
 
-        let naive = NaiveDateTime::from_timestamp(seconds, ns as u32);
-        DateTime::from_utc(naive, Utc)
+        OffsetDateTime::from_unix_timestamp_nanos(seconds * 1_000_000_000 + ns).unwrap()
     }
 }
 

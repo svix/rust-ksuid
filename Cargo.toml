@@ -18,7 +18,7 @@ maintenance = {status="actively-developed"}
 base-encode = "^0.3.1"
 byteorder = "^1.4.3"
 getrandom = "0.2.4"
-chrono = "^0.4.19"
+time = "0.3.7"
 
 [dev-dependencies]
 serde = { version = "^1.0.133", features = ["derive"] }
