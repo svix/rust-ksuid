@@ -41,7 +41,7 @@ svix-ksuid = "^0.5.0"
 use svix_ksuid::*;
 
 let ksuid = Ksuid::new(None, None);
-println("{}", ksuid.to_string());
+println!("{}", ksuid.to_string());
 // 1srOrx2ZWZBpBUvZwXKQmoEYga2
 ```
 
