@@ -307,7 +307,8 @@ impl KsuidLike for Ksuid {
     }
 
     fn from_seconds(timestamp: Option<i64>, payload: Option<&[u8]>) -> Self {
-        let timestamp = timestamp.unwrap_or_else(|| OffsetDateTime::now_utc().unix_timestamp()) - KSUID_EPOCH;
+        let timestamp =
+            timestamp.unwrap_or_else(|| OffsetDateTime::now_utc().unix_timestamp()) - KSUID_EPOCH;
         Self::new_raw(timestamp as u32, payload)
     }
 
@@ -392,7 +393,8 @@ impl KsuidMs {
     /// let ksuid = KsuidMs::from_millis(Some(1_621_627_443_000), None);
     /// ```
     pub fn from_millis(timestamp: Option<i64>, payload: Option<&[u8]>) -> Self {
-        let timestamp_ms = timestamp.unwrap_or_else(|| timestamp_millis(&OffsetDateTime::now_utc()));
+        let timestamp_ms =
+            timestamp.unwrap_or_else(|| timestamp_millis(&OffsetDateTime::now_utc()));
         let timestamp_s = (timestamp_ms / 1_000) - KSUID_EPOCH;
         let timestamp_ms = (timestamp_ms % 1_000) >> 2;
         let timestamp = ((timestamp_s << 8) & 0xFFFFFFFF00) | timestamp_ms;
