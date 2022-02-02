@@ -49,6 +49,11 @@ jobs:
       with:
         command: test
         args: --all --all-features --all-targets
+    - name: Run doc tests
+      uses: actions-rs/cargo@v1
+      with:
+        command: test
+        args: --doc
 
 #  deny-check:
 #    name: cargo-deny check
