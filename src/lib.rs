@@ -326,17 +326,17 @@ impl KsuidLike for Ksuid {
     }
 }
 
-impl ToString for Ksuid {
-    fn to_string(&self) -> String {
-        self.to_base62()
-    }
-}
-
 impl FromStr for Ksuid {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Self::from_base62(s)
+    }
+}
+
+impl fmt::Display for Ksuid {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.to_base62())
     }
 }
 
@@ -464,16 +464,16 @@ impl KsuidLike for KsuidMs {
     }
 }
 
-impl ToString for KsuidMs {
-    fn to_string(&self) -> String {
-        self.to_base62()
-    }
-}
-
 impl FromStr for KsuidMs {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         Self::from_base62(s)
+    }
+}
+
+impl fmt::Display for KsuidMs {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}", self.to_base62())
     }
 }
