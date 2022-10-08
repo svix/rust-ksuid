@@ -16,7 +16,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! svix-ksuid = "^0.5.0"
+//! svix-ksuid = "^0.6.0"
 //! ```
 //!
 //! ```
@@ -43,6 +43,16 @@
 //!
 //! And they both implement the same `KsuidLike` trait.
 //!
+//! ### Opt-in features
+//! * `serde` - adds the ability to serialize and deserialize `Ksuid` and `KsuidMs`
+//!   using serde.
+//!
+//! Make sure to enable like this:
+//! ```toml
+//! [dependencies]
+//! svix-ksuid = { version = "^0.6.0", features = ["serde"] }
+//! ```
+//!
 //! ### License
 //!
 //! ksuid source code is available under an MIT [License](./LICENSE).
@@ -54,6 +64,11 @@ use std::{error, str::FromStr};
 
 use byteorder::{BigEndian, ByteOrder};
 use time::OffsetDateTime;
+
+#[cfg(feature = "serde")]
+use serde::de::{self, Deserialize, Deserializer, Visitor};
+#[cfg(feature = "serde")]
+use serde::ser::{Serialize, Serializer};
 
 pub const KSUID_EPOCH: i64 = 1_400_000_000;
 
@@ -475,5 +490,89 @@ impl FromStr for KsuidMs {
 impl fmt::Display for KsuidMs {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.to_base62())
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for Ksuid {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&self.to_base62())
+    }
+}
+
+#[cfg(feature = "serde")]
+struct KsuidVisitor;
+
+#[cfg(feature = "serde")]
+impl<'de> Visitor<'de> for KsuidVisitor {
+    type Value = Ksuid;
+
+    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("a valid ksuid in base62")
+    }
+
+    fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+    where
+        E: de::Error,
+    {
+        match Ksuid::from_base62(value) {
+            Ok(k) => Ok(k),
+            Err(e) => Err(E::custom(format!("{}", e))),
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for Ksuid {
+    fn deserialize<D>(deserializer: D) -> Result<Ksuid, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        deserializer.deserialize_str(KsuidVisitor)
+    }
+}
+
+#[cfg(feature = "serde")]
+impl Serialize for KsuidMs {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(self.to_base62().as_str())
+    }
+}
+
+#[cfg(feature = "serde")]
+struct KsuidMsVisitor;
+
+#[cfg(feature = "serde")]
+impl<'de> Visitor<'de> for KsuidMsVisitor {
+    type Value = KsuidMs;
+
+    fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+        formatter.write_str("a base62 &str")
+    }
+
+    fn visit_str<E>(self, value: &str) -> Result<Self::Value, E>
+    where
+        E: de::Error,
+    {
+        match KsuidMs::from_base62(value) {
+            Ok(k) => Ok(k),
+            Err(e) => Err(E::custom(format!("{}", e))),
+        }
+    }
+}
+
+#[cfg(feature = "serde")]
+impl<'de> Deserialize<'de> for KsuidMs {
+    fn deserialize<D>(deserializer: D) -> Result<KsuidMs, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        deserializer.deserialize_str(KsuidMsVisitor)
     }
 }

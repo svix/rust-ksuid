@@ -18,3 +18,5 @@ Cargo.lock
 Session.vim
 
 .env
+
+*.swp
