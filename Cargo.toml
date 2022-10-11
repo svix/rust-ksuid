@@ -14,12 +14,18 @@ categories = ["data-structures", "concurrency", "database", "encoding"]
 [badges]
 maintenance = {status="actively-developed"}
 
+[features]
+# Include nothing by default
+default = []
+serde = ["dep:serde"]
+
 [dependencies]
 base-encode = "^0.3.1"
 byteorder = "^1.4.3"
 getrandom = "0.2.4"
 time = "0.3.7"
+serde = { version = "^1.0.145", optional = true, features = ["derive"] }
 
 [dev-dependencies]
-serde = { version = "^1.0.133", features = ["derive"] }
-serde_json = "^1.0.74"
+serde = { version = "^1.0.145", features = ["derive"] }
+serde_json = "^1.0.85"

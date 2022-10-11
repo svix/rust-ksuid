@@ -1,4 +1,6 @@
 use serde::Deserialize;
+#[cfg(feature = "serde")]
+use serde::Serialize;
 use std::{
     fs::File,
     io::{self, BufRead},
@@ -99,4 +101,51 @@ fn test_ordering() -> Result<(), String> {
     assert!(ksuid2 > ksuid1);
     assert!(ksuid2 >= ksuid1);
     Ok(())
+}
+
+#[cfg(feature = "serde")]
+#[derive(Serialize, Deserialize)]
+struct TestKsuid {
+    id: Ksuid,
+}
+
+#[cfg(feature = "serde")]
+#[derive(Serialize, Deserialize)]
+struct TestKsuidMs {
+    id: KsuidMs,
+}
+
+#[cfg(feature = "serde")]
+#[test]
+fn test_serialize_to_base62() {
+    let b62 = "1srOrx2ZWZBpBUvZwXKQmoEYga2";
+    let json = r#"{"id":"1srOrx2ZWZBpBUvZwXKQmoEYga2"}"#;
+    let ksuid_obj = TestKsuid {
+        id: Ksuid::from_base62(b62).unwrap(),
+    };
+    let ksuidms_obj = TestKsuidMs {
+        id: KsuidMs::from_base62(b62).unwrap(),
+    };
+
+    let test_cases = vec![
+        serde_json::to_string(&ksuid_obj),
+        serde_json::to_string(&ksuidms_obj),
+    ];
+    for serialized in test_cases {
+        assert!(serialized.is_ok());
+        let serialized = serialized.unwrap();
+        assert_eq!(serialized, json);
+    }
+}
+
+#[cfg(feature = "serde")]
+#[test]
+fn test_deserialize_from_base62() {
+    let b62 = "1srOrx2ZWZBpBUvZwXKQmoEYga2";
+    let json = r#"{"id":"1srOrx2ZWZBpBUvZwXKQmoEYga2"}"#;
+
+    let ksuid_obj: TestKsuid = serde_json::from_str(json).unwrap();
+    let ksuidms_obj: TestKsuidMs = serde_json::from_str(json).unwrap();
+    assert_eq!(ksuid_obj.id.to_string(), b62);
+    assert_eq!(ksuidms_obj.id.to_string(), b62);
 }

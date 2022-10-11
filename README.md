@@ -35,7 +35,7 @@ Add the dependency:
 
 ```toml
 [dependencies]
-svix-ksuid = "^0.5.0"
+svix-ksuid = "^0.6.0"
 ```
 
 ```rust
@@ -61,6 +61,16 @@ let ksuid = KsuidMs::new(None, None);
 ```
 
 And they both implement the same `KsuidLike` trait.
+
+### Opt-in features
+* `serde` - adds the ability to serialize and deserialize `Ksuid` and `KsuidMs`
+  using serde.
+
+Make sure to enable like this:
+```toml
+[dependencies]
+svix-ksuid = { version = "^0.6.0", features = ["serde"] }
+```
 
 ## Examples
 
