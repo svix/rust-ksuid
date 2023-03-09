@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 0.7.0
+* Add serde support (and crate feature)
+* Implement fmt::Display instead of ToString
+
 ## Version 0.6.0
 * [SECURITY] Replace the `chrono` crate with `time` (#1)
 
