@@ -1,6 +1,8 @@
 use serde::Deserialize;
 #[cfg(feature = "serde")]
 use serde::Serialize;
+use std::collections::HashSet;
+use std::hash::{Hash, Hasher};
 use std::{
     fs::File,
     io::{self, BufRead},
@@ -101,6 +103,58 @@ fn test_ordering() -> Result<(), String> {
     assert!(ksuid2 > ksuid1);
     assert!(ksuid2 >= ksuid1);
     Ok(())
+}
+
+#[test]
+fn test_hash() {
+    // given
+    let mut set = HashSet::new();
+    let ksuid1 = Ksuid::new(None, None);
+    let ksuid2 = Ksuid::new(None, None);
+    // when
+    set.insert(ksuid1.clone());
+    set.insert(ksuid2.clone());
+    // then
+    assert_eq!(set.len(), 2);
+    assert!(set.contains(&ksuid1));
+    assert!(set.contains(&ksuid2));
+}
+
+#[test]
+fn test_hash_ms() {
+    // given
+    let mut set = HashSet::new();
+    let ksuidms1 = KsuidMs::new(None, None);
+    let ksuidms2 = KsuidMs::new(None, None);
+    // when
+    set.insert(ksuidms1.clone());
+    set.insert(ksuidms2.clone());
+    // then
+    assert_eq!(set.len(), 2);
+    assert!(set.contains(&ksuidms1));
+    assert!(set.contains(&ksuidms2));
+}
+
+#[test]
+fn test_hash_are_deterministic() {
+    let cases: Vec<(&str, u64)> = vec![
+        ("000000pryYUMiBILyxOCoroLz6w", 7055508431330265589),
+        ("02GY99XXwBHbeBundUPJoqYpvet", 3000553476947541532),
+        ("04X6IIDacKaayM4WWom0flpf3mY", 15766199744355542564),
+    ];
+
+    for case in cases {
+        // given
+        let id_as_str = case.0;
+        let expected_hash = case.1;
+        // when
+        let ksuid = Ksuid::from_str(id_as_str).expect("valid id");
+        let mut hasher = std::collections::hash_map::DefaultHasher::new();
+        ksuid.hash(&mut hasher);
+        let hashed = hasher.finish();
+        // then
+        assert_eq!(hashed, expected_hash);
+    }
 }
 
 #[cfg(feature = "serde")]
