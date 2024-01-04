@@ -1,5 +1,8 @@
 # Changelog
 
+## Version 0.8.0
+* Implement `std::hash::Hash` for Ksuid structs (by @aurelien-clu)
+
 ## Version 0.7.0
 * Add serde support (and crate feature)
 * Implement fmt::Display instead of ToString
