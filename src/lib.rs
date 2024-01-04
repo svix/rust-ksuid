@@ -60,6 +60,7 @@
 //! All rights reserved to the [Svix webhooks service](https://www.svix.com).
 
 use core::fmt;
+use std::hash::{Hash, Hasher};
 use std::{error, str::FromStr};
 
 use byteorder::{BigEndian, ByteOrder};
@@ -355,6 +356,12 @@ impl fmt::Display for Ksuid {
     }
 }
 
+impl Hash for Ksuid {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.0.hash(state);
+    }
+}
+
 /// K-Sortable Unique ID (Ms accuracy)
 ///
 /// This one has Ms accuracy compared to the normal one that has second accuracy
@@ -490,6 +497,12 @@ impl FromStr for KsuidMs {
 impl fmt::Display for KsuidMs {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}", self.to_base62())
+    }
+}
+
+impl Hash for KsuidMs {
+    fn hash<H: Hasher>(&self, state: &mut H) {
+        self.0.hash(state);
     }
 }
 
