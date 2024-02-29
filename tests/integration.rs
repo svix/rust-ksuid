@@ -203,3 +203,15 @@ fn test_deserialize_from_base62() {
     assert_eq!(ksuid_obj.id.to_string(), b62);
     assert_eq!(ksuidms_obj.id.to_string(), b62);
 }
+
+#[test]
+fn test_deserialize_bad_base62_length() {
+    let short_b62 = "ZBpBUvZwXKQmoEYga2";
+    let long_b62 = "1srOrx2ZWZBpBUvZwXKQmoEYga21srOrx2ZWZBpBUvZwXKQmoEYga2";
+
+    let result = Ksuid::from_base62(short_b62);
+    assert!(result.is_err(), "Short base62 strings should fail to parse");
+
+    let result = Ksuid::from_base62(long_b62);
+    assert!(result.is_err(), "Long base62 strings should fail to parse");
+}

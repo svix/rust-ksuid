@@ -76,6 +76,7 @@ pub const KSUID_EPOCH: i64 = 1_400_000_000;
 const BASE_62_CHARS: &[u8; 62] = b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 const TOTAL_BYTES: usize = 20;
+const TOTAL_BYTES_BASE62: usize = 27;
 
 #[derive(Debug)]
 pub struct Error(String);
@@ -237,6 +238,12 @@ pub trait KsuidLike {
     ///
     /// ```
     fn from_base62(s: &str) -> Result<Self::Type, Error> {
+        if s.len() != TOTAL_BYTES_BASE62 {
+            return Err(Error(format!(
+                "Got base62 ksuid of unexpected length {}",
+                s.len()
+            )));
+        }
         if let Some(loaded) = base_encode::from_str(s, 62, BASE_62_CHARS) {
             // Get the last TOTAL_BYTES
             let loaded = if loaded.len() > TOTAL_BYTES {
