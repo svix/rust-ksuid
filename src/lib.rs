@@ -299,7 +299,7 @@ impl Ksuid {
         if let Some(payload) = payload {
             buf[Self::TIMESTAMP_BYTES..].copy_from_slice(payload);
         } else {
-            getrandom::getrandom(&mut buf[Self::TIMESTAMP_BYTES..]).unwrap();
+            getrandom::fill(&mut buf[Self::TIMESTAMP_BYTES..]).unwrap();
         }
         Self::from_bytes(buf)
     }
@@ -408,7 +408,7 @@ impl KsuidMs {
         if let Some(payload) = payload {
             buf[Self::TIMESTAMP_BYTES..].copy_from_slice(payload);
         } else {
-            getrandom::getrandom(&mut buf[Self::TIMESTAMP_BYTES..]).unwrap();
+            getrandom::fill(&mut buf[Self::TIMESTAMP_BYTES..]).unwrap();
         }
         Self::from_bytes(buf)
     }
