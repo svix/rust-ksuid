@@ -22,7 +22,7 @@ serde = ["dep:serde"]
 [dependencies]
 base-encode = "^0.3.1"
 byteorder = "^1.4.3"
-getrandom = "0.2.4"
+getrandom = "0.4.2"
 time = "0.3.7"
 serde = { version = "^1.0.145", optional = true, features = ["derive"] }
 
