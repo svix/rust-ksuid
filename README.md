@@ -24,8 +24,8 @@ For the Python version, please check out https://github.com/svix/python-ksuid
 
 ## What is a ksuid?
 
-A ksuid is a K sorted UID. In other words, a KSUID also stores a date component, so that ksuids can be approximately 
-sorted based on the time they were created. 
+A ksuid is a K sorted UID. In other words, a KSUID also stores a date component, so that ksuids can be approximately
+sorted based on the time they were created.
 
 Read more [here](https://segment.com/blog/a-brief-history-of-the-uuid/).
 
@@ -41,7 +41,7 @@ svix-ksuid = "^0.6.0"
 ```rust
 use svix_ksuid::*;
 
-let ksuid = Ksuid::new(None, None);
+let ksuid = Ksuid::now(None);
 println!("{}", ksuid.to_string());
 // 1srOrx2ZWZBpBUvZwXKQmoEYga2
 ```
@@ -57,7 +57,7 @@ The code too is fully compatible:
 ```rust
 use svix_ksuid::*;
 
-let ksuid = KsuidMs::new(None, None);
+let ksuid = KsuidMs::now(None);
 ```
 
 And they both implement the same `KsuidLike` trait.
@@ -65,11 +65,14 @@ And they both implement the same `KsuidLike` trait.
 ### Opt-in features
 * `serde` - adds the ability to serialize and deserialize `Ksuid` and `KsuidMs`
   using serde.
+* `time03` - accept timestamps as the `time::OffsetDateTime` type from the [time](https://crates.io/crates/time) (0.3.x) crate &ndash; this feature is enabled by default, for compatibility with 0.8.x and older verisons
+* `chrono04` - accept timestamps as the `chrono::DateTime<chrono::Utc>` type from the [chrono](https://crates.io/crates/chrono) (0.4.x) crate
+* `jiff02` - accept timestamps as the `jiff::Timestamp` type from the [jiff](https://crates.io/crates/jiff) (0.2.x) crate
 
 Make sure to enable like this:
 ```toml
 [dependencies]
-svix-ksuid = { version = "^0.6.0", features = ["serde"] }
+svix-ksuid = { version = "^0.6.0", features = ["serde", "jiff02"] }
 ```
 
 ## Examples
@@ -79,7 +82,7 @@ svix-ksuid = { version = "^0.6.0", features = ["serde"] }
 ```rust
 use svix_ksuid::*;
 
-let ksuid = Ksuid::new(None, None);
+let ksuid = Ksuid::now(None);
 
 // Base62
 println!("{}", ksuid.to_string()); // also: ksuid.to_base62()
@@ -90,7 +93,7 @@ println!("{:?}", ksuid.bytes());
 // [13, 53, 196, 51, 225, 147, 62, 55, 242, 117, 112, 135, 99, 173, 199, 116, 90, 245, 231, 242]
 
 // Timestamp (time::OffsetDateTime)
-println!("{:?}", ksuid.timestamp());
+println!("{:?}", ksuid.timestamp::<time::OffsetDateTime>());
 // 2021-05-21T20:04:03Z
 
 // Timestamp (seconds)
@@ -106,9 +109,10 @@ println!("{:?}", ksuid.bytes());
 
 ```rust
 use svix_ksuid::*;
+use chrono::Utc;
 
 // Timestamp is now, payload is randomly generated
-let ksuid = Ksuid::new(None, None);
+let ksuid = Ksuid::now(None);
 
 // Explicitly set either
 let bytes = [12u8; Ksuid::PAYLOAD_BYTES];

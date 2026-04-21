@@ -63,19 +63,83 @@ fn test_ksuidms_reference_compat() -> Result<(), String> {
         let line = line.unwrap();
         let data_line: TestDataLine = serde_json::from_str(&line).unwrap();
         let ksuid = Ksuid::from_str(&data_line.ksuid).unwrap();
+        let timestamp: svix_ksuid::DefaultTimestamp = ksuid.timestamp();
         let ksuidms = KsuidMs::new(
-            Some(ksuid.timestamp()),
+            Some(timestamp),
             Some(&ksuid.payload()[..KsuidMs::PAYLOAD_BYTES]),
         );
-        assert_eq!(ksuid.timestamp(), ksuidms.timestamp());
+        assert_eq!(
+            ksuid.timestamp::<svix_ksuid::DefaultTimestamp>(),
+            ksuidms.timestamp::<svix_ksuid::DefaultTimestamp>()
+        );
 
-        let ksuidms_from = KsuidMs::new(Some(ksuidms.timestamp()), Some(ksuidms.payload()));
+        let ksuidms_from = KsuidMs::new(
+            Some(ksuidms.timestamp::<svix_ksuid::DefaultTimestamp>()),
+            Some(ksuidms.payload()),
+        );
         assert_eq!(ksuidms_from.payload(), ksuidms.payload());
-        assert_eq!(ksuidms_from.timestamp(), ksuidms.timestamp());
+        assert_eq!(
+            ksuidms_from.timestamp::<svix_ksuid::DefaultTimestamp>(),
+            ksuidms.timestamp::<svix_ksuid::DefaultTimestamp>()
+        );
 
         let ksuidms = KsuidMs::from_str(&data_line.ksuid).unwrap();
-        let timediff = ksuidms.timestamp() - ksuid.timestamp();
-        assert!(timediff.whole_milliseconds().abs() <= 1_000);
+        #[cfg(feature = "time03")]
+        {
+            let timediff = ksuidms.timestamp::<time::OffsetDateTime>()
+                - ksuid.timestamp::<time::OffsetDateTime>();
+            assert!(timediff.whole_milliseconds().abs() <= 1_000);
+
+            assert_eq!(
+                ksuid.timestamp::<svix_ksuid::MinimalTimestamp>().as_secs(),
+                ksuid.timestamp::<time::OffsetDateTime>().as_secs()
+            );
+
+            assert_eq!(
+                ksuidms
+                    .timestamp::<svix_ksuid::MinimalTimestamp>()
+                    .as_millis(),
+                ksuidms.timestamp::<time::OffsetDateTime>().as_millis()
+            );
+        }
+        #[cfg(feature = "chrono04")]
+        {
+            let timediff = ksuidms.timestamp::<chrono::DateTime<chrono::Utc>>()
+                - ksuid.timestamp::<chrono::DateTime<chrono::Utc>>();
+            assert!(timediff.num_milliseconds().abs() <= 1_000);
+
+            assert_eq!(
+                ksuid.timestamp::<svix_ksuid::MinimalTimestamp>().as_secs(),
+                ksuid.timestamp::<chrono::DateTime<chrono::Utc>>().as_secs()
+            );
+
+            assert_eq!(
+                ksuidms
+                    .timestamp::<svix_ksuid::MinimalTimestamp>()
+                    .as_millis(),
+                ksuidms
+                    .timestamp::<chrono::DateTime<chrono::Utc>>()
+                    .as_millis()
+            );
+        }
+        #[cfg(feature = "jiff02")]
+        {
+            let timediff =
+                ksuidms.timestamp::<jiff::Timestamp>() - ksuid.timestamp::<jiff::Timestamp>();
+            assert!(timediff.total(jiff::Unit::Millisecond).unwrap() < 1_000.0);
+
+            assert_eq!(
+                ksuid.timestamp::<svix_ksuid::MinimalTimestamp>().as_secs(),
+                ksuid.timestamp::<jiff::Timestamp>().as_secs()
+            );
+
+            assert_eq!(
+                ksuidms
+                    .timestamp::<svix_ksuid::MinimalTimestamp>()
+                    .as_millis(),
+                ksuidms.timestamp::<jiff::Timestamp>().as_millis()
+            );
+        }
         assert_eq!(ksuidms.to_base62(), data_line.ksuid);
     }
     Ok(())
@@ -87,8 +151,29 @@ fn test_ksuidms_corner_cases() -> Result<(), String> {
     let buf = [0xFFu8; 16];
     let ksuid = Ksuid::from_seconds(Some(40_000), Some(&buf));
     let ksuidms = KsuidMs::from_bytes(*ksuid.bytes());
-    let timediff = ksuidms.timestamp() - ksuid.timestamp();
-    assert!(timediff.whole_milliseconds().abs() <= 1_000);
+
+    assert_eq!(ksuidms.timestamp_millis(), 4295007296020);
+
+    #[cfg(feature = "time03")]
+    {
+        let timediff =
+            ksuidms.timestamp::<time::OffsetDateTime>() - ksuid.timestamp::<time::OffsetDateTime>();
+        assert!(timediff.whole_milliseconds().abs() <= 1_000);
+    }
+
+    #[cfg(feature = "chrono04")]
+    {
+        let timediff = ksuidms.timestamp::<chrono::DateTime<chrono::Utc>>()
+            - ksuid.timestamp::<chrono::DateTime<chrono::Utc>>();
+        assert!(timediff.num_milliseconds().abs() <= 1_000);
+    }
+
+    #[cfg(feature = "jiff02")]
+    {
+        let timediff =
+            ksuidms.timestamp::<jiff::Timestamp>() - ksuid.timestamp::<jiff::Timestamp>();
+        assert!(timediff.total(jiff::Unit::Millisecond).unwrap() < 1_000.0);
+    }
     Ok(())
 }
 
@@ -109,11 +194,11 @@ fn test_ordering() -> Result<(), String> {
 fn test_hash() {
     // given
     let mut set = HashSet::new();
-    let ksuid1 = Ksuid::new(None, None);
-    let ksuid2 = Ksuid::new(None, None);
+    let ksuid1 = Ksuid::now(None);
+    let ksuid2 = Ksuid::now(None);
     // when
-    set.insert(ksuid1.clone());
-    set.insert(ksuid2.clone());
+    set.insert(ksuid1);
+    set.insert(ksuid2);
     // then
     assert_eq!(set.len(), 2);
     assert!(set.contains(&ksuid1));
@@ -124,11 +209,11 @@ fn test_hash() {
 fn test_hash_ms() {
     // given
     let mut set = HashSet::new();
-    let ksuidms1 = KsuidMs::new(None, None);
-    let ksuidms2 = KsuidMs::new(None, None);
+    let ksuidms1 = KsuidMs::now(None);
+    let ksuidms2 = KsuidMs::now(None);
     // when
-    set.insert(ksuidms1.clone());
-    set.insert(ksuidms2.clone());
+    set.insert(ksuidms1);
+    set.insert(ksuidms2);
     // then
     assert_eq!(set.len(), 2);
     assert!(set.contains(&ksuidms1));
