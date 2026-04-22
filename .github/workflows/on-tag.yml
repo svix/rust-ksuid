@@ -1,0 +1,20 @@
+name: CI/CD on Push Tag
+on:
+  push:
+    tags:
+      - 'v*'
+permissions:
+  contents: read
+  id-token: write
+jobs:
+  ci:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+  release:
+    needs: [ci]
+    permissions:
+      contents: read
+      id-token: write
+    uses: ./.github/workflows/release.yml

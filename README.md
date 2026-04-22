@@ -65,7 +65,7 @@ And they both implement the same `KsuidLike` trait.
 ### Opt-in features
 * `serde` - adds the ability to serialize and deserialize `Ksuid` and `KsuidMs`
   using serde.
-* `time03` - accept timestamps as the `time::OffsetDateTime` type from the [time](https://crates.io/crates/time) (0.3.x) crate &ndash; this feature is enabled by default, for compatibility with 0.8.x and older verisons
+* `time03` - accept timestamps as the `time::OffsetDateTime` type from the [time](https://crates.io/crates/time) (0.3.x) crate &ndash; this feature is enabled by default, for compatibility with 0.8.x and older versions
 * `chrono04` - accept timestamps as the `chrono::DateTime<chrono::Utc>` type from the [chrono](https://crates.io/crates/chrono) (0.4.x) crate
 * `jiff02` - accept timestamps as the `jiff::Timestamp` type from the [jiff](https://crates.io/crates/jiff) (0.2.x) crate
 

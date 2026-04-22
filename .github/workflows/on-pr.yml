@@ -1,0 +1,10 @@
+name: CI on PR
+on:
+  pull_request:
+    branches: ['*']
+jobs:
+  ci:
+    permissions:
+      contents: read
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit

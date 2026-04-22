@@ -269,7 +269,7 @@ type DefaultTimestamp = MinimalTimestamp;
 /// assert_eq!(ksuid, ksuid2);
 ///  ```
 pub trait KsuidLike {
-    /// The type of the Ksuid struct beind implemented
+    /// The type of the Ksuid struct being implemented
     type Type;
 
     /// The number of bytes used for timestamp (`TIMESTAMP_BYTES + PAYLOAD_BYTES == 20`)

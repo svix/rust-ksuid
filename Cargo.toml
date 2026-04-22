@@ -12,9 +12,6 @@ license="MIT"
 keywords=["ksuid", "uuid", "svix", "segment"]
 categories = ["data-structures", "concurrency", "database", "encoding"]
 
-[badges]
-maintenance = {status="actively-developed"}
-
 [features]
 # Include `time` by default, to match old behavior
 default = ["time03"]
@@ -26,12 +23,15 @@ chrono04 = ["dep:chrono"]
 [dependencies]
 base-encode = "^0.3.1"
 byteorder = "^1.4.3"
-getrandom = "0.4.2"
-time = { version = "0.3.47", optional = true }
 chrono = { version = "0.4", optional = true }
+getrandom = "0.4.2"
 jiff = { version = "0.2", optional = true }
 serde = { version = "^1.0.145", optional = true, features = ["derive"] }
+time = { version = "0.3.47", optional = true }
 
 [dev-dependencies]
 serde = { version = "^1.0.145", features = ["derive"] }
 serde_json = "^1.0.85"
+
+[badges]
+maintenance = {status="actively-developed"}
