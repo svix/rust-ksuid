@@ -2,7 +2,8 @@
 name = "svix-ksuid"
 version = "0.8.0"
 authors = ["Svix Inc. <oss@svix.com>"]
-edition = "2021"
+edition = "2024"
+rust-version = "1.88"
 description="A pure Rust and fully tested KSUID implementation"
 homepage="https://www.svix.com"
 repository="https://github.com/svix/rust-ksuid"
@@ -15,15 +16,20 @@ categories = ["data-structures", "concurrency", "database", "encoding"]
 maintenance = {status="actively-developed"}
 
 [features]
-# Include nothing by default
-default = []
+# Include `time` by default, to match old behavior
+default = ["time03"]
 serde = ["dep:serde"]
+jiff02 = ["dep:jiff"]
+time03 = ["dep:time"]
+chrono04 = ["dep:chrono"]
 
 [dependencies]
 base-encode = "^0.3.1"
 byteorder = "^1.4.3"
 getrandom = "0.4.2"
-time = "0.3.7"
+time = { version = "0.3.47", optional = true }
+chrono = { version = "0.4", optional = true }
+jiff = { version = "0.2", optional = true }
 serde = { version = "^1.0.145", optional = true, features = ["derive"] }
 
 [dev-dependencies]

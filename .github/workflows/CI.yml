@@ -1,72 +1,43 @@
 name: CI
-
 on:
   push:
     branches:
-    - main
+      - main
   pull_request: {}
-
 jobs:
-  check:
-    # Run `cargo check` first to ensure that the pushed code at least compiles.
+  lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@master
-    - uses: actions-rs/toolchain@v1
-      with:
-        toolchain: nightly
-        override: true
-        profile: minimal
-        components: clippy, rustfmt
-    - uses: Swatinem/rust-cache@v1
-    - name: Check
-      uses: actions-rs/cargo@v1
-      with:
-        command: clippy
-        args: --all --all-targets --all-features
-    - name: rustfmt
-      uses: actions-rs/cargo@v1
-      with:
-        command: fmt
-        args: --all -- --check
-
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: nightly
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v1
+      - name: clippy
+        run: cargo clippy --all --all-targets --all-features
+      - name: rustfmt
+        run: cargo fmt --all -- --check
   test-versions:
-    needs: check
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        rust: [stable, beta]
+        rust: ["1.88.0", stable, beta]
     steps:
-    - uses: actions/checkout@master
-    - uses: actions-rs/toolchain@v1
-      with:
-        toolchain: ${{ matrix.rust }}
-        override: true
-        profile: minimal
-    - uses: Swatinem/rust-cache@v1
-    - name: Run tests
-      uses: actions-rs/cargo@v1
-      with:
-        command: test
-        args: --all --all-features --all-targets
-    - name: Run doc tests
-      uses: actions-rs/cargo@v1
-      with:
-        command: test
-        args: --doc
-
-#  deny-check:
-#    name: cargo-deny check
-#    runs-on: ubuntu-latest
-#    continue-on-error: ${{ matrix.checks == 'advisories' }}
-#    strategy:
-#      matrix:
-#        checks:
-#          - advisories
-#          - bans licenses sources
-#    steps:
-#      - uses: actions/checkout@v2
-#      - uses: EmbarkStudios/cargo-deny-action@v1
-#        with:
-#          command: check ${{ matrix.checks }}
-#          arguments: --all-features --manifest-path axum/Cargo.toml
+      - uses: actions/checkout@v6
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ matrix.rust }}
+      - uses: Swatinem/rust-cache@v2
+      - name: Run tests (all features)
+        run: cargo test --all --all-features --all-targets
+      - name: Run tests (no features)
+        run: cargo test --all --no-default-features --all-targets
+      - name: Run doc tests
+        run: cargo test --doc
+      - name: Run tests (jiff02)
+        run: cargo test --all --no-default-features --features "jiff02" --all-targets
+      - name: Run tests (chrono04)
+        run: cargo test --all --no-default-features --features "chrono04" --all-targets
+      - name: Run tests (time03)
+        run: cargo test --all --no-default-features --features "time03" --all-targets

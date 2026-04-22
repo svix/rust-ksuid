@@ -1,0 +1,58 @@
+[graph]
+targets = [
+    { triple = "x86_64-pc-windows-gnu" },
+    { triple = "x86_64-unknown-linux-musl" },
+    { triple = "x86_64-apple-darwin" },
+    { triple = "aarch64-apple-darwin" },
+]
+
+[advisories]
+db-path = "~/.cargo/advisory-db"
+db-urls = ["https://github.com/rustsec/advisory-db"]
+yanked = "deny"
+ignore = [
+]
+
+[licenses]
+allow = [
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "CC0-1.0",
+    "ISC",
+    "MIT",
+    "MPL-2.0",
+    "Unicode-3.0",
+    "Zlib",
+]
+unused-allowed-license = "allow"
+confidence-threshold = 0.8
+exceptions = [
+]
+
+# TODO: Include internal crates
+[licenses.private]
+ignore = false
+registries = []
+
+[bans]
+multiple-versions = "allow"
+wildcards = "allow"
+highlight = "all"
+allow = []
+deny = [
+    # Versions containing the binary blob
+    # See: https://github.com/serde-rs/serde/issues/2538
+    { name = "serde_derive", version = ">1.0.171, <1.0.184"},
+]
+skip = []
+skip-tree = []
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = [
+]
+# there are several projects in here, so it's okay if we don't use them all
