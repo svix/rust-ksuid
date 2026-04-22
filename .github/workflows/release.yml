@@ -15,9 +15,6 @@ jobs:
       - uses: actions/checkout@v6
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
-        with:
-          # only restore cache for faster publishing, don't save back results
-          save-if: "false"
       - uses: rust-lang/crates-io-auth-action@v1
         id: auth
       - name: Publish

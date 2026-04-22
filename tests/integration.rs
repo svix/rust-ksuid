@@ -63,24 +63,24 @@ fn test_ksuidms_reference_compat() -> Result<(), String> {
         let line = line.unwrap();
         let data_line: TestDataLine = serde_json::from_str(&line).unwrap();
         let ksuid = Ksuid::from_str(&data_line.ksuid).unwrap();
-        let timestamp: svix_ksuid::DefaultTimestamp = ksuid.timestamp();
+        let timestamp: svix_ksuid::MinimalTimestamp = ksuid.timestamp();
         let ksuidms = KsuidMs::new(
             Some(timestamp),
             Some(&ksuid.payload()[..KsuidMs::PAYLOAD_BYTES]),
         );
         assert_eq!(
-            ksuid.timestamp::<svix_ksuid::DefaultTimestamp>(),
-            ksuidms.timestamp::<svix_ksuid::DefaultTimestamp>()
+            ksuid.timestamp::<svix_ksuid::MinimalTimestamp>(),
+            ksuidms.timestamp::<svix_ksuid::MinimalTimestamp>()
         );
 
         let ksuidms_from = KsuidMs::new(
-            Some(ksuidms.timestamp::<svix_ksuid::DefaultTimestamp>()),
+            Some(ksuidms.timestamp::<svix_ksuid::MinimalTimestamp>()),
             Some(ksuidms.payload()),
         );
         assert_eq!(ksuidms_from.payload(), ksuidms.payload());
         assert_eq!(
-            ksuidms_from.timestamp::<svix_ksuid::DefaultTimestamp>(),
-            ksuidms.timestamp::<svix_ksuid::DefaultTimestamp>()
+            ksuidms_from.timestamp::<svix_ksuid::MinimalTimestamp>(),
+            ksuidms.timestamp::<svix_ksuid::MinimalTimestamp>()
         );
 
         let ksuidms = KsuidMs::from_str(&data_line.ksuid).unwrap();
