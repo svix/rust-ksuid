@@ -1,9 +1,6 @@
-name: CI
+name: Rust CI
 on:
-  push:
-    branches:
-      - main
-  pull_request: {}
+  workflow_call:
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -13,11 +10,17 @@ jobs:
         with:
           toolchain: nightly
           components: clippy, rustfmt
-      - uses: Swatinem/rust-cache@v1
+      - uses: taiki-e/install-action@cargo-sort
+      - uses: taiki-e/install-action@cargo-machete
+      - uses: Swatinem/rust-cache@v2
       - name: clippy
         run: cargo clippy --all --all-targets --all-features
       - name: rustfmt
         run: cargo fmt --all -- --check
+      - name: cargo-sort
+        run: cargo sort --check --no-format -o package,lib,bin,features,dependencies,dev-dependencies,lints,workspace
+      - name: cargo-machete
+        run: cargo machete
   test-versions:
     runs-on: ubuntu-latest
     strategy:
@@ -41,3 +44,10 @@ jobs:
         run: cargo test --all --no-default-features --features "chrono04" --all-targets
       - name: Run tests (time03)
         run: cargo test --all --no-default-features --features "time03" --all-targets
+  prek:
+    name: Validate prek
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: astral-sh/setup-uv@v7
+      - uses: j178/prek-action@v1

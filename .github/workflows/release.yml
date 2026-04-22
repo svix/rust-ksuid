@@ -2,9 +2,7 @@ name: Release
 env:
   CARGO_TERM_COLOR: always
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_call:
 jobs:
   build:
     runs-on: ubuntu-latest
