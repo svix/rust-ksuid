@@ -35,3 +35,9 @@ jobs:
         run: cargo test --all --no-default-features --all-targets
       - name: Run doc tests
         run: cargo test --doc
+      - name: Run tests (jiff02)
+        run: cargo test --all --no-default-features --features "jiff02" --all-targets
+      - name: Run tests (chrono04)
+        run: cargo test --all --no-default-features --features "chrono04" --all-targets
+      - name: Run tests (time03)
+        run: cargo test --all --no-default-features --features "time03" --all-targets

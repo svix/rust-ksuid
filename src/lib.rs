@@ -242,7 +242,7 @@ impl TimeStamp for MinimalTimestamp {
 type DefaultTimestamp = jiff::Timestamp;
 
 #[cfg(all(not(feature = "jiff02"), feature = "chrono04"))]
-type DefaultTimestamp = chrono::Timestamp;
+type DefaultTimestamp = chrono::DateTime<chrono::Utc>;
 
 #[cfg(all(not(feature = "jiff02"), not(feature = "chrono04"), feature = "time03"))]
 type DefaultTimestamp = time::OffsetDateTime;
