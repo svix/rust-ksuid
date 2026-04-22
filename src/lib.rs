@@ -234,6 +234,26 @@ impl TimeStamp for MinimalTimestamp {
     }
 }
 
+/* The DefaultTimestamp alias is used for the methods like `.timestamp_millis()` that need
+ * some representation of time, but don't care which; we picked rather arbitrarily
+ * if you have multiple features enabled. */
+
+#[cfg(feature = "jiff02")]
+type DefaultTimestamp = jiff::Timestamp;
+
+#[cfg(all(not(feature = "jiff02"), feature = "chrono04"))]
+type DefaultTimestamp = chrono::Timestamp;
+
+#[cfg(all(not(feature = "jiff02"), not(feature = "chrono04"), feature = "time03"))]
+type DefaultTimestamp = time::OffsetDateTime;
+
+#[cfg(all(
+    not(feature = "jiff02"),
+    not(feature = "chrono04"),
+    not(feature = "time03")
+))]
+type DefaultTimestamp = MinimalTimestamp;
+
 /// K-Sortable Unique ID Trait
 ///
 /// This trait is implemented by all of the ksuid variants
@@ -313,7 +333,7 @@ pub trait KsuidLike {
     /// assert_eq!(ksuid.timestamp_seconds(), timestamp);
     /// ```
     fn timestamp_seconds(&self) -> i64 {
-        self.timestamp::<MinimalTimestamp>().as_secs()
+        self.timestamp::<DefaultTimestamp>().as_secs()
     }
 
     /// Get the payload portion of the ksuid
@@ -481,7 +501,7 @@ impl KsuidLike for Ksuid {
 
     fn from_seconds(timestamp: Option<i64>, payload: Option<&[u8]>) -> Self {
         let timestamp =
-            timestamp.unwrap_or_else(|| MinimalTimestamp::now().as_secs()) - KSUID_EPOCH;
+            timestamp.unwrap_or_else(|| DefaultTimestamp::now().as_secs()) - KSUID_EPOCH;
         Self::new_raw(timestamp as u32, payload)
     }
 
@@ -572,7 +592,7 @@ impl KsuidMs {
     /// let ksuid = KsuidMs::from_millis(Some(1_621_627_443_000), None);
     /// ```
     pub fn from_millis(timestamp: Option<i64>, payload: Option<&[u8]>) -> Self {
-        let timestamp_ms = timestamp.unwrap_or_else(|| MinimalTimestamp::now().as_millis());
+        let timestamp_ms = timestamp.unwrap_or_else(|| DefaultTimestamp::now().as_millis());
         let timestamp_s = (timestamp_ms / 1_000) - KSUID_EPOCH;
         let timestamp_ms = (timestamp_ms % 1_000) >> 2;
         let timestamp = ((timestamp_s << 8) & 0xFFFFFFFF00) | timestamp_ms;
@@ -590,7 +610,7 @@ impl KsuidMs {
     /// assert_eq!(ksuid.timestamp_millis(), timestamp);
     /// ```
     pub fn timestamp_millis(&self) -> i64 {
-        self.timestamp::<MinimalTimestamp>().as_millis()
+        self.timestamp::<DefaultTimestamp>().as_millis()
     }
 
     /// Get the raw timestamp value of the ksuid
