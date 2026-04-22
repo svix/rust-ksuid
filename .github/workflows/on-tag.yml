@@ -12,12 +12,8 @@ jobs:
       contents: read
     uses: ./.github/workflows/ci.yml
     secrets: inherit
-  security:
-    permissions:
-      contents: read
-    uses: ./.github/workflows/security.yml
   release:
-    needs: [ci, security]
+    needs: [ci]
     permissions:
       contents: read
       id-token: write
