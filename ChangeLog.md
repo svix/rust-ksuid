@@ -1,5 +1,13 @@
 # Changelog
 
+## Version 0.9.0
+* Bump MSRV to 1.88.0
+* Upgrade to Rust edition 2024
+* Add support for multiple time libraries (`time`, `chrono`, and `jiff`), controlled by feature flag
+* Add `Ksuid::now(payload)` and `KsuidMs::now(payload)` constructors
+* Reject base62 inputs with extra bytes on the end (by @nilium)
+* Many internal changes
+
 ## Version 0.8.0
 * Implement `std::hash::Hash` for Ksuid structs (by @aurelien-clu)
 
