@@ -99,7 +99,7 @@ impl error::Error for Error {
     }
 }
 
-pub trait TimeStamp: Sized {
+pub trait Timestamp: Sized {
     type ConstructionError: std::error::Error + Sized;
 
     fn now() -> Self;
@@ -118,7 +118,7 @@ pub trait TimeStamp: Sized {
 }
 
 #[cfg(feature = "time03")]
-impl TimeStamp for time::OffsetDateTime {
+impl Timestamp for time::OffsetDateTime {
     type ConstructionError = time::error::ComponentRange;
 
     fn now() -> Self {
@@ -167,7 +167,7 @@ impl std::error::Error for InvalidChronoTimestamp {
 }
 
 #[cfg(feature = "chrono04")]
-impl TimeStamp for chrono::DateTime<chrono::Utc> {
+impl Timestamp for chrono::DateTime<chrono::Utc> {
     type ConstructionError = InvalidChronoTimestamp;
 
     fn now() -> Self {
@@ -192,7 +192,7 @@ impl TimeStamp for chrono::DateTime<chrono::Utc> {
 }
 
 #[cfg(feature = "jiff02")]
-impl TimeStamp for jiff::Timestamp {
+impl Timestamp for jiff::Timestamp {
     type ConstructionError = jiff::Error;
 
     fn now() -> Self {
@@ -216,7 +216,7 @@ impl TimeStamp for jiff::Timestamp {
     }
 }
 
-impl TimeStamp for SystemTime {
+impl Timestamp for SystemTime {
     type ConstructionError = std::convert::Infallible;
 
     fn now() -> Self {
@@ -287,7 +287,7 @@ pub trait KsuidLike {
     /// let ts = SystemTime::from_millis(1776798415000).unwrap();
     /// let ksuid = Ksuid::new(Some(ts), None);
     /// ```
-    fn new<T: TimeStamp>(timestamp: Option<T>, payload: Option<&[u8]>) -> Self::Type;
+    fn new<T: Timestamp>(timestamp: Option<T>, payload: Option<&[u8]>) -> Self::Type;
 
     /// Creates a new Ksuid at the current timestamp, with an optional payload
     ///
@@ -322,7 +322,7 @@ pub trait KsuidLike {
     /// let ksuid = Ksuid::new(Some(now), None);
     /// assert_eq!(now.as_secs(), ksuid.timestamp::<SystemTime>().as_secs());
     /// ```
-    fn timestamp<T: TimeStamp>(&self) -> T;
+    fn timestamp<T: Timestamp>(&self) -> T;
 
     /// Get the timestamp portion of the ksuid in seconds
     ///
@@ -497,7 +497,7 @@ impl KsuidLike for Ksuid {
     const TIMESTAMP_BYTES: usize = 4;
     const PAYLOAD_BYTES: usize = 16;
 
-    fn new<T: TimeStamp>(timestamp: Option<T>, payload: Option<&[u8]>) -> Self {
+    fn new<T: Timestamp>(timestamp: Option<T>, payload: Option<&[u8]>) -> Self {
         let timestamp = timestamp.map(|x| x.as_secs());
         Self::from_seconds(timestamp, payload)
     }
@@ -516,7 +516,7 @@ impl KsuidLike for Ksuid {
         &self.0
     }
 
-    fn timestamp<T: TimeStamp>(&self) -> T {
+    fn timestamp<T: Timestamp>(&self) -> T {
         let timestamp = self.timestamp_raw() as i64 + KSUID_EPOCH;
         T::from_secs(timestamp).unwrap()
     }
@@ -638,7 +638,7 @@ impl KsuidLike for KsuidMs {
     const TIMESTAMP_BYTES: usize = 5;
     const PAYLOAD_BYTES: usize = 15;
 
-    fn new<T: TimeStamp>(timestamp: Option<T>, payload: Option<&[u8]>) -> Self {
+    fn new<T: Timestamp>(timestamp: Option<T>, payload: Option<&[u8]>) -> Self {
         let timestamp = timestamp.map(|x| x.as_millis());
         Self::from_millis(timestamp, payload)
     }
@@ -656,7 +656,7 @@ impl KsuidLike for KsuidMs {
         &self.0
     }
 
-    fn timestamp<T: TimeStamp>(&self) -> T {
+    fn timestamp<T: Timestamp>(&self) -> T {
         let timestamp = self.timestamp_raw() as i64;
         let seconds = (timestamp >> 8) + KSUID_EPOCH;
         let ms = ((timestamp & 0xFF) << 2) % 1_000;
@@ -773,7 +773,7 @@ impl<'de> Deserialize<'de> for KsuidMs {
 #[allow(clippy::inconsistent_digit_grouping)]
 #[cfg(test)]
 mod tests {
-    use super::{Ksuid, KsuidLike, KsuidMs, TimeStamp};
+    use super::{Ksuid, KsuidLike, KsuidMs, Timestamp};
     use std::time::SystemTime;
 
     #[test]
