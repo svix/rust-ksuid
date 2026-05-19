@@ -216,17 +216,59 @@ impl Timestamp for jiff::Timestamp {
     }
 }
 
-impl Timestamp for SystemTime {
-    type ConstructionError = std::convert::Infallible;
+#[derive(Debug, Clone)]
+pub enum InvalidSystemTimeError {
+    BeforeUnixEpoch,
+}
 
+impl std::fmt::Display for InvalidSystemTimeError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::BeforeUnixEpoch => write!(f, "time is before the unix epoch"),
+        }
+    }
+}
+
+impl std::error::Error for InvalidSystemTimeError {}
+
+impl Timestamp for SystemTime {
+    type ConstructionError = InvalidSystemTimeError;
+
+    /// Return the current SystemTime
     fn now() -> Self {
         SystemTime::now()
     }
 
-    fn from_millis(val: i64) -> Result<Self, std::convert::Infallible> {
-        Ok(std::time::UNIX_EPOCH + std::time::Duration::from_millis(val as _))
+    /// Construct a new SystemTime from a number of seconds since the Unix epoch
+    fn from_secs(val: i64) -> Result<Self, Self::ConstructionError> {
+        let unsigned = match val.try_into() {
+            Ok(v) => v,
+            Err(_) => return Err(InvalidSystemTimeError::BeforeUnixEpoch),
+        };
+        Ok(std::time::UNIX_EPOCH + std::time::Duration::from_secs(unsigned))
     }
 
+    /// Construct a new SystemTime from a number of milliseconds since the Unix epoch
+    fn from_millis(val: i64) -> Result<Self, Self::ConstructionError> {
+        let unsigned = match val.try_into() {
+            Ok(v) => v,
+            Err(_) => return Err(InvalidSystemTimeError::BeforeUnixEpoch),
+        };
+        Ok(std::time::UNIX_EPOCH + std::time::Duration::from_millis(unsigned))
+    }
+
+    /// Convert this SystemTime to an integral number of seconds since the unix epoch
+    ///
+    /// Panics if the current time is before the Unix epoch (1970-01-01)
+    fn as_secs(&self) -> i64 {
+        self.duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_secs() as _
+    }
+
+    /// Convert this SystemTime to an integral number of milliseconds since the unix epoch
+    ///
+    /// Panics if the current time is before the Unix epoch (1970-01-01)
     fn as_millis(&self) -> i64 {
         self.duration_since(std::time::UNIX_EPOCH)
             .unwrap()
