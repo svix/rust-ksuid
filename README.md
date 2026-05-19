@@ -68,6 +68,8 @@ And they both implement the same `KsuidLike` trait.
 * `chrono04` - accept timestamps as the `chrono::DateTime<chrono::Utc>` type from the [chrono](https://crates.io/crates/chrono) (0.4.x) crate
 * `jiff02` - accept timestamps as the `jiff::Timestamp` type from the [jiff](https://crates.io/crates/jiff) (0.2.x) crate
 
+If none of `time03`, `chrono04`, or `jiff02` are enabled, then timestamps will be represented using [`std::time::SystemTime`](https://doc.rust-lang.org/std/time/struct.SystemTime.html) and time values below 1970-01-01 will panic.
+
 Make sure to enable like this:
 ```toml
 [dependencies]
