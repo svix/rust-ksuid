@@ -63,8 +63,12 @@
 //! All rights reserved to the [Svix webhooks service](https://www.svix.com).
 
 use core::fmt;
-use std::hash::{Hash, Hasher};
-use std::{error, str::FromStr};
+use std::{
+    error,
+    hash::{Hash, Hasher},
+    str::FromStr,
+    time::SystemTime,
+};
 
 use byteorder::{BigEndian, ByteOrder};
 
@@ -212,25 +216,21 @@ impl TimeStamp for jiff::Timestamp {
     }
 }
 
-#[allow(unused)]
-/// A minimal representation of a timestamp (as integral milliseconds since UNIX_EPOCH) suitable
-/// for use if none of jiff02, chrono04, nor time03 are enabled
-#[derive(Debug, Clone, Copy, PartialOrd, Ord, PartialEq, Eq)]
-pub struct MinimalTimestamp(i64);
-
-impl TimeStamp for MinimalTimestamp {
+impl TimeStamp for SystemTime {
     type ConstructionError = std::convert::Infallible;
 
     fn now() -> Self {
-        Self(std::time::UNIX_EPOCH.elapsed().unwrap().as_millis() as _)
+        SystemTime::now()
     }
 
     fn from_millis(val: i64) -> Result<Self, std::convert::Infallible> {
-        Ok(Self(val))
+        Ok(std::time::UNIX_EPOCH + std::time::Duration::from_millis(val as _))
     }
 
     fn as_millis(&self) -> i64 {
-        self.0
+        self.duration_since(std::time::UNIX_EPOCH)
+            .unwrap()
+            .as_millis() as _
     }
 }
 
@@ -252,7 +252,7 @@ type DefaultTimestamp = time::OffsetDateTime;
     not(feature = "chrono04"),
     not(feature = "time03")
 ))]
-type DefaultTimestamp = MinimalTimestamp;
+type DefaultTimestamp = SystemTime;
 
 /// K-Sortable Unique ID Trait
 ///
@@ -281,9 +281,10 @@ pub trait KsuidLike {
     ///
     /// # Examples
     /// ```
+    /// use std::time::SystemTime;
     /// use svix_ksuid::*;
     ///
-    /// let ts = MinimalTimestamp::from_millis(1776798415000).unwrap();
+    /// let ts = SystemTime::from_millis(1776798415000).unwrap();
     /// let ksuid = Ksuid::new(Some(ts), None);
     /// ```
     fn new<T: TimeStamp>(timestamp: Option<T>, payload: Option<&[u8]>) -> Self::Type;
@@ -297,7 +298,7 @@ pub trait KsuidLike {
     /// let ksuid = Ksuid::now(None);
     /// ```
     fn now(payload: Option<&[u8]>) -> Self::Type {
-        Self::new(None::<MinimalTimestamp>, payload)
+        Self::new(None::<DefaultTimestamp>, payload)
     }
 
     /// Creates new Ksuid with specified timestamp (in seconds) and optional payload
@@ -314,11 +315,12 @@ pub trait KsuidLike {
     ///
     /// # Examples
     /// ```
+    /// use std::time::SystemTime;
     /// use svix_ksuid::*;
     ///
-    /// let now = MinimalTimestamp::now();
+    /// let now = SystemTime::now();
     /// let ksuid = Ksuid::new(Some(now), None);
-    /// assert_eq!(now.as_secs(), ksuid.timestamp::<MinimalTimestamp>().as_secs());
+    /// assert_eq!(now.as_secs(), ksuid.timestamp::<SystemTime>().as_secs());
     /// ```
     fn timestamp<T: TimeStamp>(&self) -> T;
 
@@ -478,9 +480,10 @@ impl Ksuid {
     ///
     /// # Examples
     /// ```
+    /// use std::time::SystemTime;
     /// use svix_ksuid::*;
     ///
-    /// let ts = MinimalTimestamp::from_millis(1776798415000).unwrap();
+    /// let ts = SystemTime::from_millis(1776798415000).unwrap();
     /// let ksuid = Ksuid::new(Some(ts), None);
     /// let raw = ksuid.timestamp_raw();
     /// ```
@@ -770,18 +773,19 @@ impl<'de> Deserialize<'de> for KsuidMs {
 #[allow(clippy::inconsistent_digit_grouping)]
 #[cfg(test)]
 mod tests {
-    use super::{Ksuid, KsuidLike, KsuidMs, MinimalTimestamp, TimeStamp};
+    use super::{Ksuid, KsuidLike, KsuidMs, TimeStamp};
+    use std::time::SystemTime;
 
     #[test]
-    fn test_minimal_timestamp() {
-        let ts = MinimalTimestamp::from_millis(1776798415_512).unwrap();
-        let truncated_s = MinimalTimestamp::from_secs(1776798415).unwrap();
+    fn test_systemtime_timestamp() {
+        let ts = SystemTime::from_millis(1776798415_512).unwrap();
+        let truncated_s = SystemTime::from_secs(1776798415).unwrap();
 
         let ksuid = Ksuid::new(Some(ts), None);
-        assert_eq!(ksuid.timestamp::<MinimalTimestamp>(), truncated_s);
+        assert_eq!(ksuid.timestamp::<SystemTime>(), truncated_s);
 
         let ksuid_ms = KsuidMs::new(Some(ts), None);
-        assert_eq!(ksuid_ms.timestamp::<MinimalTimestamp>(), ts);
+        assert_eq!(ksuid_ms.timestamp::<SystemTime>(), ts);
     }
 
     #[cfg(feature = "time03")]

@@ -8,6 +8,7 @@ use std::{
     io::{self, BufRead},
     path::PathBuf,
     str::FromStr,
+    time::SystemTime,
 };
 use svix_ksuid::*;
 
@@ -63,24 +64,24 @@ fn test_ksuidms_reference_compat() -> Result<(), String> {
         let line = line.unwrap();
         let data_line: TestDataLine = serde_json::from_str(&line).unwrap();
         let ksuid = Ksuid::from_str(&data_line.ksuid).unwrap();
-        let timestamp: svix_ksuid::MinimalTimestamp = ksuid.timestamp();
+        let timestamp: SystemTime = ksuid.timestamp();
         let ksuidms = KsuidMs::new(
             Some(timestamp),
             Some(&ksuid.payload()[..KsuidMs::PAYLOAD_BYTES]),
         );
         assert_eq!(
-            ksuid.timestamp::<svix_ksuid::MinimalTimestamp>(),
-            ksuidms.timestamp::<svix_ksuid::MinimalTimestamp>()
+            ksuid.timestamp::<SystemTime>(),
+            ksuidms.timestamp::<SystemTime>()
         );
 
         let ksuidms_from = KsuidMs::new(
-            Some(ksuidms.timestamp::<svix_ksuid::MinimalTimestamp>()),
+            Some(ksuidms.timestamp::<SystemTime>()),
             Some(ksuidms.payload()),
         );
         assert_eq!(ksuidms_from.payload(), ksuidms.payload());
         assert_eq!(
-            ksuidms_from.timestamp::<svix_ksuid::MinimalTimestamp>(),
-            ksuidms.timestamp::<svix_ksuid::MinimalTimestamp>()
+            ksuidms_from.timestamp::<SystemTime>(),
+            ksuidms.timestamp::<SystemTime>()
         );
 
         let ksuidms = KsuidMs::from_str(&data_line.ksuid).unwrap();
@@ -91,14 +92,12 @@ fn test_ksuidms_reference_compat() -> Result<(), String> {
             assert!(timediff.whole_milliseconds().abs() <= 1_000);
 
             assert_eq!(
-                ksuid.timestamp::<svix_ksuid::MinimalTimestamp>().as_secs(),
+                ksuid.timestamp::<SystemTime>().as_secs(),
                 ksuid.timestamp::<time::OffsetDateTime>().as_secs()
             );
 
             assert_eq!(
-                ksuidms
-                    .timestamp::<svix_ksuid::MinimalTimestamp>()
-                    .as_millis(),
+                ksuidms.timestamp::<SystemTime>().as_millis(),
                 ksuidms.timestamp::<time::OffsetDateTime>().as_millis()
             );
         }
@@ -109,14 +108,12 @@ fn test_ksuidms_reference_compat() -> Result<(), String> {
             assert!(timediff.num_milliseconds().abs() <= 1_000);
 
             assert_eq!(
-                ksuid.timestamp::<svix_ksuid::MinimalTimestamp>().as_secs(),
+                ksuid.timestamp::<SystemTime>().as_secs(),
                 ksuid.timestamp::<chrono::DateTime<chrono::Utc>>().as_secs()
             );
 
             assert_eq!(
-                ksuidms
-                    .timestamp::<svix_ksuid::MinimalTimestamp>()
-                    .as_millis(),
+                ksuidms.timestamp::<SystemTime>().as_millis(),
                 ksuidms
                     .timestamp::<chrono::DateTime<chrono::Utc>>()
                     .as_millis()
@@ -129,14 +126,12 @@ fn test_ksuidms_reference_compat() -> Result<(), String> {
             assert!(timediff.total(jiff::Unit::Millisecond).unwrap() < 1_000.0);
 
             assert_eq!(
-                ksuid.timestamp::<svix_ksuid::MinimalTimestamp>().as_secs(),
+                ksuid.timestamp::<SystemTime>().as_secs(),
                 ksuid.timestamp::<jiff::Timestamp>().as_secs()
             );
 
             assert_eq!(
-                ksuidms
-                    .timestamp::<svix_ksuid::MinimalTimestamp>()
-                    .as_millis(),
+                ksuidms.timestamp::<SystemTime>().as_millis(),
                 ksuidms.timestamp::<jiff::Timestamp>().as_millis()
             );
         }
