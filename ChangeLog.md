@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased changes
+* Remove internal `MinimalTimestamp` type and use [`std::time::SystemTime`](https://doc.rust-lang.org/std/time/struct.SystemTime.html) as the fallback timestamp
+* Rename `TimeStamp` trait to `Timestamp`
+
 ## Version 0.9.0
 * Bump MSRV to 1.88.0
 * Upgrade to Rust edition 2024
