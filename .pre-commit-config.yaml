@@ -33,3 +33,12 @@ repos:
     rev: v0.11.0
     hooks:
       - id: shellcheck
+  - repo: https://github.com/hyland/github-actions-ensure-sha-pinned-actions
+    rev: 22ca7a8cf33e873ba1d6fbcd2b71fa0ec5006b17 # v1.1.0
+    hooks:
+      - id: gha-sha-convert
+        args: ["--allowlist", "actions/*"]
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: f805888065fdb6162e1f800e50bb9460cbd223d6 # v0.37.2
+    hooks:
+      - id: check-dependabot
