@@ -13,7 +13,7 @@ jobs:
           components: clippy, rustfmt
       - uses: taiki-e/install-action@e407f7bafb71fd004bc5c2da3032e5470cbb6ef0 # v2.87.24
         with:
-          tool: cargo-sort
+          tool: cargo-sort@2.1.3
       - uses: taiki-e/install-action@e407f7bafb71fd004bc5c2da3032e5470cbb6ef0 # v2.87.24
         with:
           tool: cargo-machete
