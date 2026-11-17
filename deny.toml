@@ -11,6 +11,8 @@ db-path = "~/.cargo/advisory-db"
 db-urls = ["https://github.com/rustsec/advisory-db"]
 yanked = "deny"
 ignore = [
+    # we optionally support chrono or jiff, even though chrono is EOL
+    "RUSTSEC-2026-0543"
 ]
 
 [licenses]
