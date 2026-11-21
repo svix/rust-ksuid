@@ -295,3 +295,28 @@ fn test_deserialize_bad_base62_length() {
     let result = Ksuid::from_base62(long_b62);
     assert!(result.is_err(), "Long base62 strings should fail to parse");
 }
+
+#[test]
+fn test_deserialize_base62_out_of_range() {
+    // Largest value that fits in 20 bytes, as in the reference implementation.
+    let max_b62 = "aWgEPTl1tmebfsQzFP4bxwgy80V";
+    assert_eq!(Ksuid::from_base62(max_b62).unwrap().bytes(), &[0xFF; 20]);
+    assert_eq!(KsuidMs::from_base62(max_b62).unwrap().bytes(), &[0xFF; 20]);
+
+    for b62 in ["aWgEPTl1tmebfsQzFP4bxwgy80W", "zzzzzzzzzzzzzzzzzzzzzzzzzzz"] {
+        assert!(
+            Ksuid::from_base62(b62).is_err(),
+            "{b62} does not fit in 20 bytes"
+        );
+        assert!(
+            KsuidMs::from_base62(b62).is_err(),
+            "{b62} does not fit in 20 bytes"
+        );
+    }
+
+    // Leading zeros still parse.
+    let ksuid = Ksuid::from_base62("000000000000000000000000001").unwrap();
+    let mut expected = [0u8; 20];
+    expected[19] = 1;
+    assert_eq!(ksuid.bytes(), &expected);
+}
