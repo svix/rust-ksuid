@@ -7,7 +7,7 @@ test:
     cargo test --all --all-features --all-targets
     cargo test --all --no-default-features --all-targets
     cargo test --doc
-    cargo test --all --no-default-features --features "jiff02" --all-targets
+    cargo test --all --no-default-features --features "jiff" --all-targets
     cargo test --all --no-default-features --features "chrono04" --all-targets
     cargo test --all --no-default-features --features "time03" --all-targets
 

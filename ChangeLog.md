@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased
+* Upgrade (optional) jiff dependency from 0.2 to 1.0
+
 ## Version 0.10.0
 * Remove internal `MinimalTimestamp` type and use [`std::time::SystemTime`](https://doc.rust-lang.org/std/time/struct.SystemTime.html) as the fallback timestamp
 * Rename `TimeStamp` trait to `Timestamp`
