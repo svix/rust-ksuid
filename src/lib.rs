@@ -48,12 +48,12 @@
 //!   using serde.
 //! * `time03` - accept timestamps as the [`time::OffsetDateTime`] type from the time (0.3.x) crate
 //! * `chrono04` - accept timestamps as the [`chrono::DateTime<chrono::Utc>`] type from the chrono (0.4.x) crate
-//! * `jiff02` - accept timestamps as the [`jiff::Timestamp`] type from the jiff (0.2.x) crate
+//! * `jiff` - accept timestamps as the [`jiff::Timestamp`] type from the jiff (0.2.x) crate
 //!
 //! Make sure to enable like this:
 //! ```toml
 //! [dependencies]
-//! svix-ksuid = { version = "^0.6.0", features = ["serde", "time03", "jiff02"] }
+//! svix-ksuid = { version = "^0.6.0", features = ["serde", "time03", "jiff"] }
 //! ```
 //!
 //! ### License
@@ -191,7 +191,7 @@ impl Timestamp for chrono::DateTime<chrono::Utc> {
     }
 }
 
-#[cfg(feature = "jiff02")]
+#[cfg(feature = "jiff")]
 impl Timestamp for jiff::Timestamp {
     type ConstructionError = jiff::Error;
 
@@ -280,17 +280,17 @@ impl Timestamp for SystemTime {
  * some representation of time, but don't care which; we picked rather arbitrarily
  * if you have multiple features enabled. */
 
-#[cfg(feature = "jiff02")]
+#[cfg(feature = "jiff")]
 type DefaultTimestamp = jiff::Timestamp;
 
-#[cfg(all(not(feature = "jiff02"), feature = "chrono04"))]
+#[cfg(all(not(feature = "jiff"), feature = "chrono04"))]
 type DefaultTimestamp = chrono::DateTime<chrono::Utc>;
 
-#[cfg(all(not(feature = "jiff02"), not(feature = "chrono04"), feature = "time03"))]
+#[cfg(all(not(feature = "jiff"), not(feature = "chrono04"), feature = "time03"))]
 type DefaultTimestamp = time::OffsetDateTime;
 
 #[cfg(all(
-    not(feature = "jiff02"),
+    not(feature = "jiff"),
     not(feature = "chrono04"),
     not(feature = "time03")
 ))]
@@ -867,7 +867,7 @@ mod tests {
         );
     }
 
-    #[cfg(feature = "jiff02")]
+    #[cfg(feature = "jiff")]
     #[test]
     fn test_jiff_support() {
         use jiff::{RoundMode, Timestamp, TimestampRound, Unit};

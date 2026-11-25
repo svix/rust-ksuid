@@ -119,11 +119,11 @@ fn test_ksuidms_reference_compat() -> Result<(), String> {
                     .as_millis()
             );
         }
-        #[cfg(feature = "jiff02")]
+        #[cfg(feature = "jiff")]
         {
             let timediff =
                 ksuidms.timestamp::<jiff::Timestamp>() - ksuid.timestamp::<jiff::Timestamp>();
-            assert!(timediff.total(jiff::Unit::Millisecond).unwrap() < 1_000.0);
+            assert!(timediff.as_millis() < 1_000);
 
             assert_eq!(
                 ksuid.timestamp::<SystemTime>().as_secs(),
@@ -163,11 +163,11 @@ fn test_ksuidms_corner_cases() -> Result<(), String> {
         assert!(timediff.num_milliseconds().abs() <= 1_000);
     }
 
-    #[cfg(feature = "jiff02")]
+    #[cfg(feature = "jiff")]
     {
         let timediff =
             ksuidms.timestamp::<jiff::Timestamp>() - ksuid.timestamp::<jiff::Timestamp>();
-        assert!(timediff.total(jiff::Unit::Millisecond).unwrap() < 1_000.0);
+        assert!(timediff.as_millis() < 1_000);
     }
     Ok(())
 }

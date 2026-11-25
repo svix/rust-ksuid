@@ -73,7 +73,7 @@ If none of `time03`, `chrono04`, or `jiff02` are enabled, then timestamps will b
 Make sure to enable like this:
 ```toml
 [dependencies]
-svix-ksuid = { version = "^0.6.0", features = ["serde", "jiff02"] }
+svix-ksuid = { version = "^0.6.0", features = ["serde", "jiff"] }
 ```
 
 ## Examples
