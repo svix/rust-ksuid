@@ -458,9 +458,15 @@ pub trait KsuidLike {
             )));
         }
         if let Some(loaded) = base_encode::from_str(s, 62, BASE_62_CHARS) {
-            // Get the last TOTAL_BYTES
+            // Get the last TOTAL_BYTES. Leading zero digits decode to extra
+            // zero bytes, but any other extra byte means the value does not
+            // fit in TOTAL_BYTES (above "aWgEPTl1tmebfsQzFP4bxwgy80V").
             let loaded = if loaded.len() > TOTAL_BYTES {
-                &loaded[loaded.len() - TOTAL_BYTES..]
+                let (extra, last) = loaded.split_at(loaded.len() - TOTAL_BYTES);
+                if extra.iter().any(|&b| b != 0) {
+                    return Err(Error(format!("Got base62 ksuid out of range: {s}")));
+                }
+                last
             } else {
                 &loaded[..]
             };
