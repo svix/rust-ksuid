@@ -320,3 +320,19 @@ fn test_deserialize_base62_out_of_range() {
     expected[19] = 1;
     assert_eq!(ksuid.bytes(), &expected);
 }
+
+#[test]
+fn test_deserialize_base62_non_ascii() {
+    // 27 bytes long, but "İ" (U+0130) is not a base62 digit.
+    for b62 in ["İujsswThIGTUYm2K8FjOOfXtY1", "0ujsswThIGTUYm2K8FjOOfXtYİ"] {
+        assert_eq!(b62.len(), 27);
+        assert!(
+            Ksuid::from_base62(b62).is_err(),
+            "{b62} is not valid base62"
+        );
+        assert!(
+            KsuidMs::from_base62(b62).is_err(),
+            "{b62} is not valid base62"
+        );
+    }
+}

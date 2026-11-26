@@ -457,6 +457,11 @@ pub trait KsuidLike {
                 s.len()
             )));
         }
+        // base_encode compares only the low byte of each char, so "İ" (U+0130)
+        // would decode as "0". Every base62 digit is ASCII.
+        if !s.is_ascii() {
+            return Err(Error("Failed to decode".to_owned()));
+        }
         if let Some(loaded) = base_encode::from_str(s, 62, BASE_62_CHARS) {
             // Get the last TOTAL_BYTES. Leading zero digits decode to extra
             // zero bytes, but any other extra byte means the value does not
